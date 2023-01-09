@@ -5,15 +5,17 @@ const addressInput = document.getElementById("address")! as HTMLInputElement;
 
 const GOOGLE_API_KEY = "AIzaSyDzJT8sN0xTcQ_wrcglO1VB26FPnupFJqo";
 
+declare var google: any;
+
+type GoogleGeocodingResponse = {
+  results: { geometry: { location: { lat: number; lng: number } } }[];
+  status: "OK" | "ZERO_RESULTS";
+};
+
 function searchAddressHandler(event: Event) {
   event.preventDefault();
 
   const enteredAddress = addressInput.value;
-
-  type GoogleGeocodingResponse = {
-    results: { geometry: { location: { lat: number; lng: number } } }[];
-    status: "OK" | "ZERO_RESULTS";
-  };
 
   //send this to Google's API
   axios
@@ -27,6 +29,16 @@ function searchAddressHandler(event: Event) {
         throw new Error("could not fetch location");
       }
       const coordinates = response.data.results[0].geometry.location;
+
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: coordinates,
+        zoom: 16,
+      });
+
+      new google.maps.Marker({
+        position: coordinates,
+        map: map,
+      });
     })
     .catch((err) => {
       alert(err.message);
